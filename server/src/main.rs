@@ -6,6 +6,7 @@ mod model;
 mod perms;
 mod post;
 mod predicate;
+mod registry;
 mod secrets;
 
 use anyhow::Result;

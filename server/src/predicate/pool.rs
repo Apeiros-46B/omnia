@@ -21,7 +21,7 @@ impl PoolPredicate {
         }
     }
 
-    pub fn parse(src: &str) -> Result<Self> {
+    pub fn parse(src: &str, _: &impl super::PredicateResolver) -> Result<Self> {
         match PredicateAtom::parse(src)? {
             PredicateAtom::Comparison {
                 key: "posts",

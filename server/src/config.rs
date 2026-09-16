@@ -151,6 +151,10 @@ fn validate_collections<'a>(
         validate_perms_block_roles(&collection.permissions, &uniq_role_ids)?;
     }
 
+    if !seen_default_collection {
+        bail!("one collection must be default=true");
+    }
+
     Ok(())
 }
 

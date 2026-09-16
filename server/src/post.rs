@@ -23,4 +23,4 @@ impl FromStr for Rating {
 
 /// not a primary key, transient derived integer
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Eq, Ord, Hash)]
-pub struct Collection(pub u32);
+pub struct CollectionKey(pub u32);

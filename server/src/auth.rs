@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use moka::future::Cache;
 use serde::Deserialize;
 
@@ -40,30 +38,13 @@ pub struct Role {
 // TODO: it would probably be nice to have a check permission wrapper that takes in a
 // user and a generic model object like Post or Tag and internally generates *Context
 pub struct Auth {
-    // indexed by RoleKey, first role is lowest
-    pub roles: Vec<Role>,
-    pub role_mapping: HashMap<String, RoleKey>,
-
     // cache of user auth data
     pub user_cache: Cache<UserId, User>,
 }
 
 impl Auth {
-    /// roles must be sorted by power, the highest role first and the lowest last
-    pub fn new(
-        user_cache_size: u64,
-        roles: Vec<Role>,
-    ) -> Self {
-        let mut role_mapping = HashMap::new();
-
-        // rev to iterate from lowest to highest, lowest gets role key 0
-        for (i, role) in roles.iter().rev().enumerate() {
-            role_mapping.insert(role.id.clone(), RoleKey(i as u16));
-        }
-
+    pub fn new(user_cache_size: u64) -> Self {
         Auth {
-            roles,
-            role_mapping,
             user_cache: Cache::new(user_cache_size),
         }
     }

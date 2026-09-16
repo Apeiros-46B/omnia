@@ -2,7 +2,7 @@ use anyhow::{Result, bail};
 
 use crate::auth::RoleKey;
 
-use super::atom::{Comparator, PredicateAtom, parse_val};
+use super::{atom::{Comparator, PredicateAtom}, PredicateResolver};
 
 pub struct UserContext {
     pub role: RoleKey,
@@ -20,14 +20,14 @@ impl UserPredicate {
         }
     }
 
-    pub fn parse(src: &str) -> Result<Self> {
+    pub fn parse(src: &str, resolver: &impl PredicateResolver) -> Result<Self> {
         match PredicateAtom::parse(src)? {
-            // TODO: need to get role key from id to key mapping and then add tests
-            // PredicateAtom::Comparison {
-            //     key: "role",
-            //     cmp,
-            //     val,
-            // } => Ok(Self::Role { cmp, role: parse_val(val)? }),
+            PredicateAtom::Comparison { key: "role", cmp, val, } => {
+                let Some(role) = resolver.lookup_role(val) else {
+                    bail!("unknown role '{val}'");
+                };
+                Ok(Self::Role { cmp, role: role })
+            },
 
             _ => bail!("invalid user predicate"),
         }
@@ -36,4 +36,30 @@ impl UserPredicate {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        auth::{RoleKey},
+        predicate::Comparator,
+    };
+
+    use super::{UserContext, UserPredicate};
+
+    fn user_ctx(role: u16) -> UserContext {
+        UserContext { role: RoleKey(role) }
+    }
+
+    #[test]
+    fn match_score() {
+        let cond_role_gt = UserPredicate::Role {
+            cmp: Comparator::Gt,
+            role: RoleKey(5),
+        };
+        let cond_role_lt = UserPredicate::Role {
+            cmp: Comparator::Lt,
+            role: RoleKey(5),
+        };
+        let ctx = user_ctx(10);
+
+        assert!(cond_role_gt.matches(&ctx));
+        assert!(!cond_role_lt.matches(&ctx));
+    }
 }

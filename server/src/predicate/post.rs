@@ -1,13 +1,13 @@
 use anyhow::{Result, bail};
 
-use super::atom::{Comparator, PredicateAtom, parse_val};
-use crate::post::{Collection, Rating};
+use super::{atom::{Comparator, PredicateAtom, parse_val}, PredicateResolver};
+use crate::post::{CollectionKey, Rating};
 
 pub struct PostContext {
     pub rating: Rating,
     pub score: i64,
     pub owned: bool,
-    pub collection: Collection,
+    pub collection: CollectionKey,
 }
 
 #[derive(Clone, Debug)]
@@ -15,7 +15,7 @@ pub enum PostPredicate {
     Rating { cmp: Comparator, rating: Rating },
     Score { cmp: Comparator, score: i64 },
     Owned(bool), // whether or not the user owns the post
-    Collection(Collection),
+    Collection(CollectionKey),
 }
 
 impl PostPredicate {
@@ -28,7 +28,7 @@ impl PostPredicate {
         }
     }
 
-    pub fn parse(src: &str) -> Result<Self> {
+    pub fn parse(src: &str, resolver: &impl PredicateResolver) -> Result<Self> {
         match PredicateAtom::parse(src)? {
             PredicateAtom::Comparison {
                 key: "rating",
@@ -42,15 +42,18 @@ impl PostPredicate {
                 val,
             } => Ok(Self::Score { cmp, score: parse_val(val)? }),
 
-            PredicateAtom::Flag { key: "owned", val } => Ok(Self::Owned(val)),
-
-            // TODO: need to map val to integer ID, probably need to pass the
-            // collection mapping to this parse function
             PredicateAtom::Comparison {
                 key: "collection",
                 cmp: Comparator::Eq,
-                val: _,
-            } => todo!(),
+                val,
+            } => {
+                let Some(col) = resolver.lookup_collection(val) else {
+                    bail!("unknown collection '{val}'")
+                };
+                Ok(Self::Collection(col))
+            },
+
+            PredicateAtom::Flag { key: "owned", val } => Ok(Self::Owned(val)),
 
             _ => bail!("invalid post predicate"),
         }
@@ -60,7 +63,7 @@ impl PostPredicate {
 #[cfg(test)]
 mod tests {
     use crate::{
-        post::{Collection, Rating},
+        post::{CollectionKey, Rating},
         predicate::Comparator,
     };
 
@@ -71,7 +74,7 @@ mod tests {
             rating,
             score,
             owned,
-            collection: Collection(col),
+            collection: CollectionKey(col),
         }
     }
 
@@ -121,8 +124,8 @@ mod tests {
 
     #[test]
     fn match_collection() {
-        let cond_collection0 = PostPredicate::Collection(Collection(0));
-        let cond_collection1 = PostPredicate::Collection(Collection(1));
+        let cond_collection0 = PostPredicate::Collection(CollectionKey(0));
+        let cond_collection1 = PostPredicate::Collection(CollectionKey(1));
         let ctx = post_ctx(Rating::Safe, 0, false, 0);
 
         assert!(cond_collection0.matches(&ctx));

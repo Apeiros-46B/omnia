@@ -128,7 +128,6 @@ impl<'a> AtomParser<'a> {
     }
 
     fn key_valid_ch(b: &u8) -> bool {
-        // TODO: maybe consider adding _ or -
         b.is_ascii_lowercase()
     }
 

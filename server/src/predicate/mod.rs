@@ -11,11 +11,23 @@ pub mod scopes {
     pub use super::user::*;
 }
 
+#[allow(unused_imports)] // used by tests only
+pub use atom::{Comparator, PredicateParseError};
+
 use anyhow::Result;
 use smallvec::SmallVec;
 
-#[allow(unused_imports)] // used by tests only
-pub use atom::{Comparator, PredicateParseError};
+use crate::{auth::RoleKey, post::CollectionKey};
+
+pub trait ResourceContext {
+    const SCOPE: PredicateScope;
+    fn matches(&self, conds: &ScopedPredicates) -> bool;
+}
+
+pub trait PredicateResolver {
+    fn lookup_role(&self, id: &str) -> Option<RoleKey>;
+    fn lookup_collection(&self, id: &str) -> Option<CollectionKey>;
+}
 
 // {{{ boilerplate generator
 macro_rules! declare_scopes {
@@ -27,13 +39,20 @@ macro_rules! declare_scopes {
             }
 
             impl PredicateScope {
-                pub fn parse_conds(&self, raw: &[&str]) -> Result<ScopedPredicates> {
+                pub fn parse_conds(
+                    &self,
+                    raw: &[&str],
+                    resolver: &impl PredicateResolver,
+                ) -> Result<ScopedPredicates> {
                     match self {
                         $(Self::$scope => {
                             let conds: SmallVec<[scopes::[<$scope Predicate>]; 4]> =
                                 raw
                                 .into_iter()
-                                .map(|raw| scopes::[<$scope Predicate>]::parse(raw))
+                                .map(|raw| scopes::[<$scope Predicate>]::parse(
+                                    raw,
+                                    resolver,
+                                ))
                                 .collect::<Result<_>>()?;
                             Ok(ScopedPredicates::$scope(conds))
                         }),+
@@ -83,9 +102,4 @@ declare_scopes! {
     Post,
     Tag,
     User,
-}
-
-pub trait ResourceContext {
-    const SCOPE: PredicateScope;
-    fn matches(&self, conds: &ScopedPredicates) -> bool;
 }
