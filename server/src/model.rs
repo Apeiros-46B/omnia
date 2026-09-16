@@ -23,10 +23,7 @@ pub struct State {
 impl AppState {
     /// Create a new application state and connect to the database.
     pub async fn new(config: Config) -> Result<Self> {
-        // TODO: aggregate collections, needed for collection predicates
-
-        let db = Db::open(&config.general.database_path).await?;
-        let secrets = Secrets::read_or_generate(&db).await?;
+        // TODO: aggregate collections and per-collection perms
 
         let auth = Auth::new(64, config.roles);
         let mapped_perms = config.permissions.iter()
@@ -35,9 +32,10 @@ impl AppState {
         let mut perm_builder = PermissionTableBuilder::default();
         perm_builder.parse_and_register(mapped_perms, None)?;
 
-        // TODO: per-collection perms, need to register col in StorageBackend first
-
         let perms = perm_builder.build();
+
+        let db = Db::open(&config.general.database_path).await?;
+        let secrets = Secrets::read_or_generate(&db).await?;
 
         Ok(AppState(Arc::new(State {
             db,

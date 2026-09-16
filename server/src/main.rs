@@ -5,8 +5,8 @@ mod db;
 mod model;
 mod perms;
 mod post;
+mod predicate;
 mod secrets;
-mod util;
 
 use anyhow::Result;
 use axum::{Router, extract::State, routing::get};

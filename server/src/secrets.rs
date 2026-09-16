@@ -55,7 +55,7 @@ mod tests {
     use crate::{db::Db, secrets::Secrets};
 
     #[sqlx::test(migrator = "crate::db::MIGRATOR")]
-    async fn test_alphabet(pool: SqlitePool) -> Result<()> {
+    async fn makes_valid_alphabet(pool: SqlitePool) -> Result<()> {
         let db = Db::test(pool);
 
         let alphabet = Secrets::read_or_generate(&db).await?.sqids_alphabet;
@@ -71,7 +71,7 @@ mod tests {
     }
 
     #[sqlx::test(migrator = "crate::db::MIGRATOR")]
-    async fn test_reread(pool: SqlitePool) -> Result<()> {
+    async fn generates_then_rereads(pool: SqlitePool) -> Result<()> {
         let db = Db::test(pool);
 
         // first call should generate, second call should retrieve

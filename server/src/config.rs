@@ -182,6 +182,7 @@ mod tests {
         let yaml = "
             general:
                 storage_path: /mnt/media/pmo
+                database_path: test.db
                 allow_signups: false
             roles:
                 - id: owner
@@ -209,13 +210,13 @@ mod tests {
     }
 
     #[test]
-    fn test_valid_config_is_ok() {
+    fn valid_config_is_ok() {
         let config = create_valid_config();
         assert!(config.validate().is_ok());
     }
 
     #[test]
-    fn test_duplicate_role_ids() {
+    fn duplicate_role_ids() {
         let mut config = create_valid_config();
         config.roles.push(Role {
             id: "owner".to_string(),
@@ -228,7 +229,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_owner_roles() {
+    fn multiple_owner_roles() {
         let mut config = create_valid_config();
         config.roles.push(Role {
             id: "owner2".to_string(),
@@ -241,7 +242,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_user_roles() {
+    fn multiple_user_roles() {
         let mut config = create_valid_config();
         config.roles.push(Role {
             id: "user2".to_string(),
@@ -254,7 +255,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_guest_roles() {
+    fn multiple_guest_roles() {
         let mut config = create_valid_config();
         config.roles.push(Role {
             id: "guest1".to_string(),
@@ -276,7 +277,7 @@ mod tests {
     }
 
     #[test]
-    fn test_global_permission_nonexistent_role() {
+    fn global_permission_nonexistent_role() {
         let mut config = create_valid_config();
         config.permissions.insert(
             "post.edit".to_string(),
@@ -286,7 +287,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_default_collections() {
+    fn multiple_default_collections() {
         let mut config = create_valid_config();
         config.collections.insert(
             "col2".to_string(),
@@ -300,7 +301,7 @@ mod tests {
     }
 
     #[test]
-    fn test_collection_permission_nonexistent_role() {
+    fn collection_permission_nonexistent_role() {
         let mut config = create_valid_config();
         let col = config.collections.get_mut("col1").unwrap();
         col.permissions.insert(
@@ -311,7 +312,7 @@ mod tests {
     }
 
     #[test]
-    fn test_library_references_nonexistent_collection() {
+    fn library_references_nonexistent_collection() {
         let mut config = create_valid_config();
         let lib = config.libraries.get_mut("lib1").unwrap();
         lib.collection = Some("col2".to_string());
