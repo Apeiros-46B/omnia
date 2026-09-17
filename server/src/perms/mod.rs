@@ -253,6 +253,33 @@ mod tests {
     }
 
     #[test]
+    fn collection_permission_overrides_more_specific_global_rule() {
+        let permissions = PermissionTable::compile(
+            [
+                RuleDef {
+                    expr: "post.view(owned,rating=safe)",
+                    role_id: "role3",
+                    collection_id: None,
+                },
+                RuleDef {
+                    expr: "post.view",
+                    role_id: "role0",
+                    collection_id: Some("collection1"),
+                },
+            ],
+            &TestResolver,
+        )
+        .unwrap();
+
+        let mut context = post_context(Rating::Safe, true);
+        context.collection = CollectionKey(1);
+        assert!(permissions.check(Permission::PostView, &context, RoleKey(0)));
+
+        context.collection = CollectionKey(0);
+        assert!(!permissions.check(Permission::PostView, &context, RoleKey(0)));
+    }
+
+    #[test]
     fn collection_permission_rejects_non_post_scope() {
         let defs = [RuleDef {
             expr: "pool.view",

@@ -2,7 +2,10 @@ use std::cmp::Ordering;
 
 use anyhow::{Result, bail};
 
-use crate::{auth::RoleKey, predicate::ScopedPredicates};
+use crate::{
+    auth::RoleKey,
+    predicate::{ScopedPredicates, scopes::PostPredicate},
+};
 
 use super::Permission;
 
@@ -42,8 +45,15 @@ impl Rule {
     }
 
     // TODO: probably order by wildcard depth instead of just wildcard or not
-    fn prio(&self) -> (usize, bool, usize, RoleKey) {
+    fn prio(&self) -> (bool, usize, bool, usize, RoleKey) {
+        let col_specific = if let ScopedPredicates::Post(conds) = &self.conds {
+            conds.iter().any(|p| matches!(p, PostPredicate::Collection(_)))
+        } else {
+            false
+        };
+
         (
+            col_specific,
             self.conds.len(),
             self.exact,
             self.perm.path_depth(),
@@ -64,8 +74,8 @@ mod tests {
 
     use crate::{
         auth::RoleKey,
-        post::Rating,
-        predicate::{scopes::PostPredicate, Comparator, ScopedPredicates},
+        post::{CollectionKey, Rating},
+        predicate::{Comparator, ScopedPredicates, scopes::PostPredicate},
     };
 
     use super::{Permission, Rule};
@@ -131,5 +141,29 @@ mod tests {
         let b = rule(Permission::PostView, [owned, rating], 0, false);
 
         assert_eq!(a.cmp_prio(&b), Ordering::Less);
+    }
+
+    #[test]
+    fn collection_specific_rule_has_highest_priority() {
+        let collection_specific = rule(
+            Permission::PostView,
+            [PostPredicate::Collection(CollectionKey(0))],
+            0,
+            false,
+        );
+        let global = rule(
+            Permission::PostEditTags,
+            [
+                PostPredicate::Owned(true),
+                PostPredicate::Rating {
+                    cmp: Comparator::Eq,
+                    rating: Rating::Safe,
+                },
+            ],
+            u16::MAX,
+            true,
+        );
+
+        assert_eq!(collection_specific.cmp_prio(&global), Ordering::Greater);
     }
 }
