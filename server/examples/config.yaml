@@ -1,5 +1,5 @@
 general:
-  storage_path: /mnt/media/pmo
+  storage_path: /mnt/media/omnia
   database_path: test.db
   allow_signups: false
 

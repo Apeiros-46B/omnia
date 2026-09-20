@@ -185,7 +185,7 @@ mod tests {
     fn create_valid_config() -> Config {
         let yaml = "
             general:
-                storage_path: /mnt/media/pmo
+                storage_path: /mnt/media/omnia
                 database_path: test.db
                 allow_signups: false
             roles:
