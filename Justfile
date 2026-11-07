@@ -1,5 +1,10 @@
-server:
-	cd server && cargo run
+mod server 'apps/server'
+mod web 'apps/web'
 
-test:
-	cd server && cargo test
+build:
+	just server build
+	just web build
+
+setup:
+	just server setup
+	just web setup

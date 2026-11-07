@@ -1,0 +1,6 @@
+packages:
+  - apps/web
+  - packages/*
+  - extensions/*/frontend
+minimumReleaseAgeExclude:
+  - vite@8.3.6

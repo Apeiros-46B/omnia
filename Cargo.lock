@@ -1457,6 +1457,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "omnia"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "argon2",
+ "axum",
+ "blake3",
+ "lasso",
+ "moka",
+ "password-hash",
+ "paste",
+ "rand",
+ "regex",
+ "reqwest",
+ "scraper",
+ "serde",
+ "smallvec",
+ "smol_str",
+ "sqids",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tower-http 0.7.1",
+ "tracing",
+ "tracing-subscriber",
+ "yaml_serde",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1594,35 +1623,6 @@ name = "pkg-config"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
-
-[[package]]
-name = "omnia"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "argon2",
- "axum",
- "blake3",
- "lasso",
- "moka",
- "password-hash",
- "paste",
- "rand",
- "regex",
- "reqwest",
- "scraper",
- "serde",
- "smallvec",
- "smol_str",
- "sqids",
- "sqlx",
- "thiserror",
- "tokio",
- "tower-http 0.7.1",
- "tracing",
- "tracing-subscriber",
- "yaml_serde",
-]
 
 [[package]]
 name = "portable-atomic"

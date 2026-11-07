@@ -1,0 +1,13 @@
+database_url := "sqlite:" + module_directory() / "test.db"
+
+run:
+	DATABASE_URL='{{database_url}}' cargo run --locked
+
+test:
+	DATABASE_URL='{{database_url}}' cargo test --workspace --locked
+
+build:
+	DATABASE_URL='{{database_url}}' cargo build --workspace --locked
+
+setup:
+	DATABASE_URL='{{database_url}}' sqlx database setup

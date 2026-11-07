@@ -1,0 +1,13 @@
+{
+	"name": "omnia-workspace",
+	"private": true,
+	"packageManager": "pnpm@11.25.0",
+	"engines": {
+		"node": ">=22.13.0"
+	},
+	"scripts": {
+		"dev": "pnpm --filter @omnia/web dev",
+		"check": "pnpm -r --if-present check",
+		"build": "pnpm -r --if-present build"
+	}
+}

@@ -1,0 +1,11 @@
+dev:
+	pnpm dev
+
+check:
+	pnpm check
+
+build:
+	pnpm build
+
+setup:
+	pnpm install --frozen-lockfile
